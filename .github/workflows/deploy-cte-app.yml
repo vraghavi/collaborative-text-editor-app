@@ -1,6 +1,9 @@
 name: learn-github-actions
 run-name: ${{github.actor}} is deploying cte-app
 on: [push]
+permissions:
+  id-token: write
+  contents: read
 jobs:
   check-bats-version:
     runs-on: ubuntu-latest
@@ -31,8 +34,8 @@ jobs:
       - name: Set AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
-          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          role-to-assume: arn:aws:iam::949024534101:role/github-oidc
+          role-session-name: GitHubOIDCForAWSSession
           aws-region: us-east-1
           
       - name: Copy to S3

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import 'quill/dist/quill.snow.css';
 import ReactQuill from 'react-quill';
 import { useLocation } from 'react-router';
+import { debounce, throttle } from 'lodash';
 
 const WS_URL = "wss://fyi2v7i4zc.execute-api.us-east-1.amazonaws.com/production";
 
@@ -11,6 +12,7 @@ function TextEditor() {
     const socket = useRef('');
     const data = useLocation();
     let name = data.state.name;
+    // let sendMessageTimeout;
 
     useEffect(() => {
         // console.log(state);
@@ -35,14 +37,32 @@ function TextEditor() {
         }
     }, []);
 
-    const handleProcedureContentChange = (value) => {
+    const handleProcedureContentChange = debounce(value => {
         if (message === value) return;
-        console.log(value);
-        setMessage(value);
         if (!socket.current) return;
-        socket.current.send(JSON.stringify({ "name": "mkbhd", "action": "message", "message": value }));
+        setMessage(value);
+        socket.current.send(JSON.stringify({ "name": name, "action": "message", "message": value }));
         console.log("send message to server", value);
-    }
+    }, 1000);
+
+    // const handleProcedureContentChange = (value) => {
+    //     if (message === value) return;
+    // clearTimeout(sendMessageTimeout);
+    // if (!socket.current) return;
+    // sendMessageTimeout = setTimeout(() => {
+    //     setMessage(value);
+    //     socket.current.send(JSON.stringify({ "name": name, "action": "message", "message": value }));
+    //     console.log("send message to server", value);
+    // }, 5000);
+
+    // const debounceMessage = debounce(() => {
+    //     console.log('=====>', value);
+    //     setMessage(value);
+    //     socket.current.send(JSON.stringify({ "name": name, "action": "message", "message": value }));
+    //     console.log("send message to server", value);
+    // }, 5000);
+    // debounceMessage();
+    // }
 
 
     var modules = {
